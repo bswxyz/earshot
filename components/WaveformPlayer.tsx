@@ -249,7 +249,7 @@ export default function WaveformPlayer() {
     };
   }, [cacheColors]);
 
-  /* ---------- the transport loop (~30fps, skipped entirely under reduced motion) ---------- */
+  /* ---------- the transport loop (~30fps, runs only while playing; skipped entirely under reduced motion) ---------- */
   useEffect(() => {
     if (reduced) {
       playingRef.current = false;
@@ -258,6 +258,7 @@ export default function WaveformPlayer() {
       drawRef.current(0);
       return;
     }
+    if (!playing) return; // no rAF while paused — the loop starts on play and is cancelled below
     let raf = 0;
     let last = performance.now();
     let acc = 99;
@@ -285,7 +286,7 @@ export default function WaveformPlayer() {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [reduced, audioMute, audioTick]);
+  }, [reduced, playing, audioMute, audioTick]);
 
   /* ---------- seeking ---------- */
   const seekTo = useCallback((sec: number) => {
@@ -307,7 +308,11 @@ export default function WaveformPlayer() {
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     draggingRef.current = true;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* pointer already gone (NotFoundError) — the click-seek below still lands */
+    }
     seekFromPointer(e.clientX);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {

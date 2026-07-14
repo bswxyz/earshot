@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "document.documentElement.classList.add('js');try{var t=localStorage.getItem('earshot-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}",
+              "document.documentElement.classList.add('js');try{var t=localStorage.getItem('earshot-theme');if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name=theme-color]');if(!m){m=document.createElement('meta');m.name='theme-color';document.head.appendChild(m);}m.setAttribute('content',t==='dark'?'#141416':'#f3f0e9');}}catch(e){}",
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
